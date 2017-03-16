@@ -26,6 +26,12 @@ namespace WindowsFormsApplication1
         public Form1()
         {
             InitializeComponent();
+
+            ContextMenuStrip listboxMenu = new ContextMenuStrip();
+            ToolStripMenuItem rightMenu = new ToolStripMenuItem("Copy");
+            rightMenu.Click += new EventHandler(Copy_Click);
+            listboxMenu.Items.AddRange(new ToolStripItem[] { rightMenu });
+            lbPathList.ContextMenuStrip = listboxMenu;
         }
 
         public string[] FilterOutEmptyString(string[] input)
@@ -159,25 +165,26 @@ namespace WindowsFormsApplication1
             ListBox.SelectedIndexCollection sic = lbPathList.SelectedIndices;//得到选择的Item的下标
 
             if (sic.Count == 0)
-                return;
-            else
             {
-                //  将选择的Item放入list中
-                List<int> list = new List<int>();
-                for (int i = 0; i < sic.Count; i++)
-                {
-                    list.Add(sic[i]);
-                }
-                list.Sort();//对list进行排序（库里默认的排序结果一般指的是从下到大的排序）
-
-                while (list.Count != 0)//按照下标从大到小的顺序从ListBox控件里删除选择的Item
-                //如果这里采用其它顺序则可能破坏下标的有效性
-                {
-                    lbPathList.Items.RemoveAt(list[list.Count - 1]);
-                    list.RemoveAt(list.Count - 1);
-                }
+                MessageBox.Show("您没有选中任务文件路径。请选择文件路径，再点击删除按钮。");
+                return;
             }
+            
+            //  将选择的Item放入list中
+            List<int> list = new List<int>();
+            for (int i = 0; i < sic.Count; i++)
+            {
+                list.Add(sic[i]);
+            }
+            list.Sort();//对list进行排序（库里默认的排序结果一般指的是从下到大的排序）
 
+            while (list.Count != 0)//按照下标从大到小的顺序从ListBox控件里删除选择的Item
+            //如果这里采用其它顺序则可能破坏下标的有效性
+            {
+                lbPathList.Items.RemoveAt(list[list.Count - 1]);
+                list.RemoveAt(list.Count - 1);
+            }
+            
             savePaths();
             loadPaths();
         }
@@ -186,5 +193,38 @@ namespace WindowsFormsApplication1
         {
             deletePaths();
         }
+
+        /// <summary>
+        /// ListBox中的项目的右击菜单中的“copy”选项的处理函数
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Copy_Click(object sender, EventArgs e)
+        {
+            ListBox.SelectedIndexCollection sic = lbPathList.SelectedIndices;//得到选择的Item的下标
+
+            if (sic.Count == 0)
+            {
+                MessageBox.Show("您没有选中任务文件路径。请选择文件路径，再点击删除按钮。");
+                return;
+            }
+
+            //  将选择的Item放入list中
+            string buf = "";
+            List<int> list = new List<int>();
+            for (int i = 0; i < sic.Count; i++)
+            {
+                list.Add(sic[i]);
+            }
+            list.Sort();//对list进行排序（库里默认的排序结果一般指的是从下到大的排序）
+
+            for (int i = 0; i < sic.Count; i++)
+            {
+                buf += (lbPathList.Items[sic[i]] + "\r\n");
+            }
+
+            Clipboard.SetText(buf);
+        }
+        
     }
 }
